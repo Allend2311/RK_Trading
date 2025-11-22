@@ -241,7 +241,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </svg>
                             <span>Google</span>
                         </button>
-                        <button type="button" class="social-btn facebook-btn">
+                        <button type="button" class="social-btn facebook-btn" onclick="signInWithFacebook()">
                             <svg width="20" height="20" fill="#1877F2" viewBox="0 0 24 24">
                                 <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                             </svg>
@@ -267,6 +267,83 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </div>
     </div>
+
+    <!-- Firebase JS SDK -->
+    <script type="module">
+      // Import the functions you need from the SDKs you need
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+      import { getAuth, FacebookAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+
+      // Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyBo1bspb_x2Z4tQSCp8JfpDuRu1LVoerVw",
+        authDomain: "rk-trading-cfd84.firebaseapp.com",
+        projectId: "rk-trading-cfd84",
+        storageBucket: "rk-trading-cfd84.firebasestorage.app",
+        messagingSenderId: "569098274198",
+        appId: "1:569098274198:web:5e154381975487a58049b7",
+        measurementId: "G-10VCC6LJQP"
+      };
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+
+      // Facebook provider
+      const facebookProvider = new FacebookAuthProvider();
+      facebookProvider.addScope('email');
+      facebookProvider.addScope('public_profile');
+
+      // Facebook login function
+      window.signInWithFacebook = function() {
+        signInWithPopup(auth, facebookProvider)
+          .then((result) => {
+            // The signed-in user info
+            const user = result.user;
+
+            // Facebook Access Token (may not always be available)
+            let accessToken = null;
+            if (result.credential && result.credential.accessToken) {
+              accessToken = result.credential.accessToken;
+            }
+
+            // Send user data to PHP backend
+            fetch('fb_callback.php', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                uid: user.uid,
+                name: user.displayName,
+                email: user.email,
+                photoURL: user.photoURL,
+                accessToken: accessToken
+              })
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                // Redirect based on user type or to home
+                window.location.href = data.redirect || 'home.php';
+              } else {
+                alert('Login failed: ' + data.message);
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              alert('An error occurred during login');
+            });
+          })
+          .catch((error) => {
+            // Handle Errors here.
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            console.error('Facebook login error:', errorCode, errorMessage);
+            alert('Facebook login failed: ' + errorMessage);
+          });
+      };
+    </script>
 
     <script src="script.js"></script>
 </body>
