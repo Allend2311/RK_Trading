@@ -176,13 +176,15 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Add loading states for form submissions
+    // AJAX Add-to-Cart handling and loading states for form submissions
     const forms = document.querySelectorAll('form');
     forms.forEach(form => {
-        form.addEventListener('submit', function() {
+        form.addEventListener('submit', function(e) {
+            const isAddToCart = this.classList.contains('add-to-cart-form');
             const submitBtn = this.querySelector('.btn-primary, .quantity-btn, .btn');
+            const originalText = submitBtn ? submitBtn.innerHTML : null;
+
             if (submitBtn && !submitBtn.classList.contains('quantity-btn')) {
-                const originalText = submitBtn.innerHTML;
                 submitBtn.innerHTML = `
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="animate-spin">
                         <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
@@ -191,12 +193,56 @@ document.addEventListener('DOMContentLoaded', function() {
                     Processing...
                 `;
                 submitBtn.disabled = true;
+            }
 
-                // Re-enable after 2 seconds (in case of slow response)
-                setTimeout(() => {
-                    submitBtn.innerHTML = originalText;
-                    submitBtn.disabled = false;
-                }, 2000);
+            if (isAddToCart) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                fetch('', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    // Update cart count in tab
+                    const cartTab = document.querySelector('[onclick="showTab(\'cart\')"]');
+                    if (cartTab) {
+                        cartTab.innerHTML = `
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="8" cy="21" r="1"></circle>
+                                <circle cx="19" cy="21" r="1"></circle>
+                                <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
+                            </svg>
+                            Cart ${data.totalItems > 0 ? `(${data.totalItems})` : ''}
+                        `;
+                    }
+
+                    // Flash success message
+                    const container = document.querySelector('.dashboard-container');
+                    if (container && data.message) {
+                        const msg = document.createElement('div');
+                        msg.className = `message ${data.success ? 'success-message' : 'error-message'}`;
+                        msg.innerHTML = `
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22,4 12,14.01 9,11.01"></polyline>
+                            </svg>
+                            <span>${data.message}</span>
+                        `;
+                        container.prepend(msg);
+                        setTimeout(() => { msg.remove(); }, 4000);
+                    }
+                })
+                .catch(() => { /* ignore */ })
+                .finally(() => {
+                    if (submitBtn) {
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.disabled = false;
+                    }
+                });
             }
         });
     });

@@ -49,10 +49,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // 4. Hash the password
         $hashed_password = password_hash($password, PASSWORD_BCRYPT);
 
-        // 5. Insert data into the database with a default role
-        $user_type = 'customer'; // Set default role
-        $stmt = $mysqli->prepare("INSERT INTO users (name, email, password, user_type) VALUES (?, ?, ?, ?)"); // Use $mysqli
-        $stmt->bind_param("ssss", $name, $email, $hashed_password, $user_type);
+        // 5. Insert data into the database (users table has no user_type column)
+        $stmt = $mysqli->prepare("INSERT INTO users (name, email, password) VALUES (?, ?, ?)"); // Use $mysqli
+        $stmt->bind_param("sss", $name, $email, $hashed_password);
 
         if ($stmt->execute()) {
             // 6. Redirect to login page with a success message

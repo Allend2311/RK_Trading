@@ -11,12 +11,8 @@ if (!isset($_SESSION['user_type']) || $_SESSION['user_type'] !== 'admin') {
     exit;
 }
 
-// Handle logout
-if (isset($_GET['logout'])) {
-    session_destroy();
-    header('Location: login.php');
-    exit;
-}
+// Handle logout via dedicated endpoint (logout.php)
+// Removed inline GET logout handling to centralize logic.
 
 require_once __DIR__ . '/db_connect.php';
 
@@ -198,14 +194,14 @@ $topProducts = [];
                         <p>Admin Portal</p>
                     </div>
                 </div>
-                <button class="logout-btn">
+                <a class="logout-btn" href="logout.php">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
                         <polyline points="16,17 21,12 16,7"></polyline>
                         <line x1="21" y1="12" x2="9" y2="12"></line>
                     </svg>
                     Logout
-                </button>
+                </a>
             </div>
         </div>
     </header>

@@ -70,15 +70,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['cart'] = [];
             }
         }
+
+        // If this is an AJAX request, return JSON and exit
+        if (isset($_POST['ajax']) && $_POST['ajax'] == '1') {
+            $totalItemsAjax = 0;
+            $totalAmountAjax = 0;
+            foreach ($_SESSION['cart'] as $it) {
+                $totalItemsAjax += $it['quantity'];
+                $totalAmountAjax += $it['price'] * $it['quantity'];
+            }
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => true,
+                'message' => isset($message) ? $message : (isset($error) ? $error : ''),
+                'totalItems' => $totalItemsAjax,
+                'totalAmount' => $totalAmountAjax,
+            ]);
+            exit;
+        }
     }
 }
 
-// Handle logout
-if (isset($_GET['logout'])) {
-    session_destroy();
-    header('Location: login.php');
-    exit;
-}
+// Logout is handled centrally by logout.php
 
 // Mock product data
 $products = [
@@ -224,14 +237,14 @@ $filteredProducts = array_filter($products, function($product) use ($searchQuery
                         </svg>
                         Track Order
                     </a>
-                    <button class="btn btn-outline btn-red logout-btn">
+                    <a href="logout.php" class="btn btn-outline btn-red logout-btn">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
                             <polyline points="16,17 21,12 16,7"></polyline>
                             <line x1="21" y1="12" x2="9" y2="12"></line>
                         </svg>
                         Logout
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>
@@ -335,19 +348,20 @@ $filteredProducts = array_filter($products, function($product) use ($searchQuery
                         <div class="product-footer">
                             <span class="price">₱<?php echo number_format($product['price']); ?></span>
                             <span class="rating">⭐ <?php echo $product['rating']; ?></span>
+                            <form method="POST" action="" class="add-to-cart-form">
+                                <input type="hidden" name="action" value="add_to_cart">
+                                <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
+                                <input type="hidden" name="ajax" value="1">
+                                <button type="submit" class="btn btn-primary add-to-cart-btn">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="8" cy="21" r="1"></circle>
+                                        <circle cx="19" cy="21" r="1"></circle>
+                                        <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
+                                    </svg>
+                                    Add to Cart
+                                </button>
+                            </form>
                         </div>
-                        <form method="POST" action="">
-                            <input type="hidden" name="action" value="add_to_cart">
-                            <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
-                            <button type="submit" class="btn btn-primary">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <circle cx="8" cy="21" r="1"></circle>
-                                    <circle cx="19" cy="21" r="1"></circle>
-                                    <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
-                                </svg>
-                                Add to Cart
-                            </button>
-                        </form>
                     </div>
                 </div>
                 <?php endforeach; ?>
