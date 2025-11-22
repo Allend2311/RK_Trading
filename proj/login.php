@@ -56,27 +56,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // If no errors, process login
     if (empty($errors)) {
         // Secure Login Logic
-        $stmt = $mysqli->prepare("SELECT id, password, user_type FROM users WHERE email = ?");
+        $stmt = $mysqli->prepare("SELECT id, password FROM users WHERE email = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $stmt->store_result();
 
         if ($stmt->num_rows > 0) {
-            $stmt->bind_result($id, $hashed_password, $userType);
+            $stmt->bind_result($id, $hashed_password);
             $stmt->fetch();
 
             if (password_verify($password, $hashed_password)) {
                 // Login success
                 $_SESSION['logged_in'] = true;
                 $_SESSION['user_id'] = $id;
-                $_SESSION['user_type'] = $userType; // Assuming you have a 'user_type' column
+                $_SESSION['user_type'] = 'customer'; // Default role in absence of user_type column
                 $_SESSION['email'] = $email;
 
-                if ($userType === 'admin') {
-                    header('Location: admin.php');
-                } else {
-                    header('Location: customer.php');
-                }
+                header('Location: customer.php');
                 exit;
             } else {
                 $errors['password'] = 'Invalid email or password.';

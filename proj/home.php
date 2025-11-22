@@ -1,3 +1,7 @@
+<?php
+session_start();
+$isCustomer = isset($_SESSION['logged_in']) && $_SESSION['logged_in'] && isset($_SESSION['user_type']) && $_SESSION['user_type'] === 'customer';
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,6 +9,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RK Trading - Affordable Solar Lights & Fans</title>
     <link rel="stylesheet" href="home-style.css">
+    <style>
+        /* Force black font color for Add to Cart buttons on home page */
+        .add-to-cart-form .btn,
+        .add-to-cart-form .btn.btn-primary {
+            color: #000 !important;
+        }
+        /* Ensure SVG icons don't override perceived color */
+        .add-to-cart-form .btn svg {
+            stroke: currentColor;
+            color: #000;
+        }
+    </style>
 </head>
 <body>
     <!-- Navigation -->
@@ -108,7 +124,15 @@
                             <span class="price">₹2,499</span>
                             <span class="original-price">₹3,499</span>
                         </div>
+                        <?php if ($isCustomer): ?>
+                        <form method="POST" action="customer.php" class="add-to-cart-form">
+                            <input type="hidden" name="action" value="add_to_cart">
+                            <input type="hidden" name="product_id" value="1">
+                            <button type="submit" class="btn btn-primary">Add to Cart</button>
+                        </form>
+                        <?php else: ?>
                         <a href="login.php" class="btn btn-outline">View Details</a>
+                        <?php endif; ?>
                     </div>
                 </div>
                 <div class="product-card">
@@ -122,7 +146,15 @@
                             <span class="price">₹8,999</span>
                             <span class="original-price">₹12,999</span>
                         </div>
+                        <?php if ($isCustomer): ?>
+                        <form method="POST" action="customer.php" class="add-to-cart-form">
+                            <input type="hidden" name="action" value="add_to_cart">
+                            <input type="hidden" name="product_id" value="5">
+                            <button type="submit" class="btn btn-primary">Add to Cart</button>
+                        </form>
+                        <?php else: ?>
                         <a href="login.php" class="btn btn-outline">View Details</a>
+                        <?php endif; ?>
                     </div>
                 </div>
                 <div class="product-card">
@@ -136,7 +168,15 @@
                             <span class="price">₹4,999</span>
                             <span class="original-price">₹6,999</span>
                         </div>
+                        <?php if ($isCustomer): ?>
+                        <form method="POST" action="customer.php" class="add-to-cart-form">
+                            <input type="hidden" name="action" value="add_to_cart">
+                            <input type="hidden" name="product_id" value="6">
+                            <button type="submit" class="btn btn-primary">Add to Cart</button>
+                        </form>
+                        <?php else: ?>
                         <a href="login.php" class="btn btn-outline">View Details</a>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
