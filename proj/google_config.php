@@ -10,8 +10,10 @@ if (file_exists($vendorAutoload)) {
 }
 
 $googleClient = null;
-$google_callback = 'http://localhost/proj/proj/google_callback.php'; // Adjust path to match your XAMPP alias
+// Disable Google OAuth as no credentials provided
+//$google_callback = 'https://rk-trade2025.infinityfreeapp.com/proj/google_callback.php';
 
+/*
 if (class_exists('Google_Client')) {
     $googleClass = 'Google_Client';
     $googleClient = new $googleClass();
@@ -22,6 +24,7 @@ if (class_exists('Google_Client')) {
     $googleClient->setAccessType('offline');
     $googleClient->setPrompt('select_account consent');
 }
+*/
 
 // Expose a helper to build login URL. Returns '#' if the client isn't available.
 function getGoogleLoginUrl($client): string {

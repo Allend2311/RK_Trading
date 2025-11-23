@@ -232,7 +232,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     <!-- Social Login Buttons -->
                     <div class="social-buttons">
-                        <button type="button" class="social-btn google-btn">
+                        <button type="button" class="social-btn google-btn" onclick="signInWithGoogle()">
                             <svg width="20" height="20" viewBox="0 0 24 24">
                                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -272,7 +272,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script type="module">
       // Import the functions you need from the SDKs you need
       import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-      import { getAuth, FacebookAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+      import { getAuth, FacebookAuthProvider, GoogleAuthProvider, signInWithPopup, linkWithCredential, fetchSignInMethodsForEmail } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
       // Firebase configuration
       const firebaseConfig = {
@@ -293,6 +293,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       const facebookProvider = new FacebookAuthProvider();
       facebookProvider.addScope('email');
       facebookProvider.addScope('public_profile');
+
+      // Google provider
+      const googleProvider = new GoogleAuthProvider();
 
       // Facebook login function
       window.signInWithFacebook = function() {
@@ -340,7 +343,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             const errorCode = error.code;
             const errorMessage = error.message;
             console.error('Facebook login error:', errorCode, errorMessage);
-            alert('Facebook login failed: ' + errorMessage);
+
+            if (errorCode === 'auth/account-exists-with-different-credential') {
+              alert('This email is already associated with another sign-in method. Please use your Facebook account to sign in.');
+            } else {
+              alert('Facebook login failed: ' + errorMessage);
+            }
+          });
+      };
+
+      // Google login function
+      window.signInWithGoogle = function() {
+        signInWithPopup(auth, googleProvider)
+          .then((result) => {
+            // The signed-in user info
+            const user = result.user;
+
+            // Send user data to PHP backend
+            fetch('google_callback.php', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                uid: user.uid,
+                name: user.displayName,
+                email: user.email,
+                photoURL: user.photoURL,
+                idToken: result.credential.idToken // For Google, use idToken
+              })
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                // Redirect based on user type or to home
+                window.location.href = data.redirect || 'home.php';
+              } else {
+                alert('Login failed: ' + data.message);
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              alert('An error occurred during login');
+            });
+          })
+          .catch((error) => {
+            console.error('Google login error:', error.code, error.message);
+            alert('Google login failed: ' + error.message);
           });
       };
     </script>

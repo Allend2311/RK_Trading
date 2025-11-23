@@ -1,10 +1,10 @@
 <?php
 // Database connection for rk_trading_db1
 // Update credentials as needed for your local XAMPP MySQL
-$DB_HOST = '127.0.0.1';
-$DB_USER = 'root';
-$DB_PASS = '';
-$DB_NAME = 'rk_trading';
+$DB_HOST = 'sql300.infinityfree.com';
+$DB_USER = 'if0_40486344';
+$DB_PASS = 'YOUR_DB_PASSWORD_HERE';  // Replace with your actual affinityfree MySQL password
+$DB_NAME = 'if0_40486344_rk_trading';
 
 $mysqli = new mysqli($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME);
 if ($mysqli->connect_errno) {

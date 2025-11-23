@@ -12,14 +12,14 @@ if (file_exists($vendorAutoload)) {
 $fb = null;
 $fb_helper = null;
 $fb_permissions = ['email'];
-$fb_callback_url = 'http://localhost/proj/proj/fb_callback.php'; // Adjust to your XAMPP path
+$fb_callback_url = 'https://rk-trade2025.infinityfreeapp.com/proj/fb_callback.php'; // Confirmed for affinityfree hosting
 
 // Only initialize the Facebook SDK if the class exists (i.e. package installed)
 if (class_exists('Facebook\\Facebook')) {
     $fbClass = 'Facebook\\Facebook';
     $fb = new $fbClass([
-        'app_id' => 'FACEBOOK_APP_ID',
-        'app_secret' => 'FACEBOOK_APP_SECRET',
+        'app_id' => '820536124065197', // TODO: Replace with your real Facebook App ID
+        'app_secret' => '8abe1d6c74ab924f5ca4c88b3b01827e', // TODO: Replace with your real Facebook App Secret
         'default_graph_version' => 'v19.0',
     ]);
 
